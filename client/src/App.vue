@@ -1,11 +1,21 @@
-<script setup></script>
+<script setup>
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <nav>
+    <router-link to="/">Home</router-link>
+    <router-link to="/report">Report Lost Item</router-link>
+    <router-link to="/my-reports">My Reports</router-link>
+  </nav>
+
+  <router-view />
 </template>
 
-<style scoped></style>
+<style scoped>
+nav {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid #ccc;
+}
+</style>
