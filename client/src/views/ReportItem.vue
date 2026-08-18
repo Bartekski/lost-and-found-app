@@ -59,15 +59,26 @@ async function submitReport() {
   error.value = ''
   success.value = false
 
+  const token = localStorage.getItem('token')
+
+  if (!token) {
+    error.value = 'You must be logged in to report an item.'
+    return
+  }
+
   try {
     const response = await fetch('http://localhost:3000/api/items', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
       body: JSON.stringify(form),
     })
 
     if (!response.ok) {
-      throw new Error('Failed to submit report')
+      const data = await response.json()
+      throw new Error(data.error || 'Failed to submit report')
     }
 
     success.value = true

@@ -7,6 +7,7 @@ require('dotenv').config();
 const connectDB = require('./db');
 const Item = require('./models/Item');
 const User = require('./models/User');
+const requireAuth = require('./middleware/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -88,7 +89,8 @@ app.post('/api/auth/login', async (req, res) => {
 
 // ---------- ITEM ROUTES ----------
 
-app.post('/api/items', async (req, res) => {
+// Create a new lost item report (protected)
+app.post('/api/items', requireAuth, async (req, res) => {
   try {
     const { name, description, category, location, date } = req.body;
 
@@ -96,7 +98,15 @@ app.post('/api/items', async (req, res) => {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    const newItem = await Item.create({ name, description, category, location, date });
+    const newItem = await Item.create({
+      name,
+      description,
+      category,
+      location,
+      date,
+      userId: req.userId,
+    });
+
     console.log('New item reported:', newItem);
     res.status(201).json(newItem);
   } catch (err) {
@@ -105,9 +115,10 @@ app.post('/api/items', async (req, res) => {
   }
 });
 
-app.get('/api/items', async (req, res) => {
+// Get only the logged-in user's items (protected)
+app.get('/api/items', requireAuth, async (req, res) => {
   try {
-    const items = await Item.find().sort({ createdAt: -1 });
+    const items = await Item.find({ userId: req.userId }).sort({ createdAt: -1 });
     res.json(items);
   } catch (err) {
     console.error(err);
