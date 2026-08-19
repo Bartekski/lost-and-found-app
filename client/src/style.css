@@ -233,3 +233,12 @@ button.danger {
 button.danger:hover {
   background: #b91c1c;
 }
+
+.filters {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.filters input {
+  flex: 1;
+}
