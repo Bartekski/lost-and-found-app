@@ -6,6 +6,7 @@ import Register from '../views/Register.vue'
 import Login from '../views/Login.vue'
 import VenueDashboard from '../views/VenueDashboard.vue'
 import ItemChat from '../views/ItemChat.vue'
+import Profile from '../views/Profile.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,6 +18,7 @@ const router = createRouter({
     { path: '/login', name: 'login', component: Login },
     { path: '/venue-dashboard', name: 'venue-dashboard', component: VenueDashboard },
     { path: '/chat/:id', name: 'item-chat', component: ItemChat },
+    { path: '/profile', name: 'profile', component: Profile },
   ],
 })
 

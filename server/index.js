@@ -122,6 +122,40 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+app.get('/api/auth/me', requireAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select('-password');
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.put('/api/auth/profile', requireAuth, async (req, res) => {
+  try {
+    const { name, email, password, address } = req.body;
+    const updates = {};
+
+    if (name) updates.name = name;
+    if (email) updates.email = email;
+    if (address !== undefined) updates.address = address;
+    if (password) {
+      if (password.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters' });
+      }
+      updates.password = await bcrypt.hash(password, 10);
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(req.userId, updates, { new: true }).select('-password');
+    res.json(updatedUser);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // ---------- VENUE ROUTES ----------
 
 app.get('/api/venues', async (req, res) => {

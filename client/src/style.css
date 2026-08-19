@@ -225,3 +225,11 @@ nav button {
 .item-chat button {
   align-self: auto;
 }
+
+button.danger {
+  background: var(--danger);
+  margin-left: 0.5rem;
+}
+button.danger:hover {
+  background: #b91c1c;
+}

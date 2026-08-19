@@ -12,6 +12,7 @@
         <p>Lost at: {{ item.location }} on {{ item.date }}</p>
         <p>Status: {{ item.status }}</p>
         <router-link :to="{ path: `/chat/${item._id}`, query: { name: item.name } }">Chat</router-link>
+        <button @click="deleteItem(item._id)" class="danger">Delete</button>
       </li>
     </ul>
   </div>
@@ -42,4 +43,22 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+async function deleteItem(id) {
+  if (!confirm('Are you sure you want to delete this report?')) return
+
+  const token = localStorage.getItem('token')
+  try {
+    const response = await fetch(`http://localhost:3000/api/items/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+
+    if (!response.ok) throw new Error('Failed to delete item')
+
+    items.value = items.value.filter(item => item._id !== id)
+  } catch (err) {
+    console.error(err)
+  }
+}
 </script>
