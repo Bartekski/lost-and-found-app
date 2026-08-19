@@ -4,6 +4,7 @@ import ReportItem from '../views/ReportItem.vue'
 import MyReports from '../views/MyReports.vue'
 import Register from '../views/Register.vue'
 import Login from '../views/Login.vue'
+import VenueDashboard from '../views/VenueDashboard.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -13,6 +14,7 @@ const router = createRouter({
     { path: '/my-reports', name: 'my-reports', component: MyReports },
     { path: '/register', name: 'register', component: Register },
     { path: '/login', name: 'login', component: Login },
+    { path: '/venue-dashboard', name: 'venue-dashboard', component: VenueDashboard },
   ],
 })
 

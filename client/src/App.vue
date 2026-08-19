@@ -22,6 +22,7 @@ function logout() {
     <span class="spacer"></span>
 
     <template v-if="user">
+      <router-link v-if="user.role === 'venue'" to="/venue-dashboard">Dashboard</router-link>
       <span>Hi, {{ user.name }}</span>
       <button @click="logout">Log Out</button>
     </template>

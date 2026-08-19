@@ -24,7 +24,17 @@
       </label>
 
       <label>
-        Location lost
+        Venue
+        <select v-model="form.venueId" required>
+          <option value="">Select a venue</option>
+          <option v-for="venue in venues" :key="venue._id" :value="venue._id">
+            {{ venue.name }}
+          </option>
+        </select>
+      </label>
+
+      <label>
+        Location lost (e.g. room number, area)
         <input v-model="form.location" type="text" required />
       </label>
 
@@ -42,18 +52,29 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 
 const form = reactive({
   name: '',
   description: '',
   category: '',
+  venueId: '',
   location: '',
   date: '',
 })
 
+const venues = ref([])
 const error = ref('')
 const success = ref(false)
+
+onMounted(async () => {
+  try {
+    const response = await fetch('http://localhost:3000/api/venues')
+    venues.value = await response.json()
+  } catch (err) {
+    console.error('Failed to load venues:', err)
+  }
+})
 
 async function submitReport() {
   error.value = ''
@@ -82,7 +103,7 @@ async function submitReport() {
     }
 
     success.value = true
-    Object.assign(form, { name: '', description: '', category: '', location: '', date: '' })
+    Object.assign(form, { name: '', description: '', category: '', venueId: '', location: '', date: '' })
   } catch (err) {
     error.value = err.message
   }

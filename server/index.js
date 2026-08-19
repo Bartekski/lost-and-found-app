@@ -87,15 +87,28 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// ---------- VENUE ROUTES ----------
+
+// List all venue accounts (used by guests to pick a venue when reporting)
+app.get('/api/venues', async (req, res) => {
+  try {
+    const venues = await User.find({ role: 'venue' }).select('name _id');
+    res.json(venues);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // ---------- ITEM ROUTES ----------
 
-// Create a new lost item report (protected)
+// Create a new lost item report (protected, requires venueId)
 app.post('/api/items', requireAuth, async (req, res) => {
   try {
-    const { name, description, category, location, date } = req.body;
+    const { name, description, category, location, date, venueId } = req.body;
 
-    if (!name || !description || !category || !location || !date) {
-      return res.status(400).json({ error: 'All fields are required' });
+    if (!name || !description || !category || !location || !date || !venueId) {
+      return res.status(400).json({ error: 'All fields including venue are required' });
     }
 
     const newItem = await Item.create({
@@ -105,6 +118,7 @@ app.post('/api/items', requireAuth, async (req, res) => {
       location,
       date,
       userId: req.userId,
+      venueId,
     });
 
     console.log('New item reported:', newItem);
@@ -115,11 +129,77 @@ app.post('/api/items', requireAuth, async (req, res) => {
   }
 });
 
-// Get only the logged-in user's items (protected)
+// Get only the logged-in user's own items
 app.get('/api/items', requireAuth, async (req, res) => {
   try {
     const items = await Item.find({ userId: req.userId }).sort({ createdAt: -1 });
     res.json(items);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get ALL items belonging to the logged-in venue (venue dashboard)
+app.get('/api/items/all', requireAuth, async (req, res) => {
+  try {
+    if (req.userRole !== 'venue') {
+      return res.status(403).json({ error: 'Only venue accounts can view all items' });
+    }
+
+    const items = await Item.find({ venueId: req.userId }).sort({ createdAt: -1 });
+    res.json(items);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Update an item (e.g. mark as found) - venue only
+app.put('/api/items/:id', requireAuth, async (req, res) => {
+  try {
+    if (req.userRole !== 'venue') {
+      return res.status(403).json({ error: 'Only venue accounts can update items' });
+    }
+
+    const { status } = req.body;
+
+    const updatedItem = await Item.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedItem) {
+      return res.status(404).json({ error: 'Item not found' });
+    }
+
+    console.log('Item updated:', updatedItem);
+    res.json(updatedItem);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Delete an item - owner or venue
+app.delete('/api/items/:id', requireAuth, async (req, res) => {
+  try {
+    const item = await Item.findById(req.params.id);
+
+    if (!item) {
+      return res.status(404).json({ error: 'Item not found' });
+    }
+
+    const isOwner = item.userId.toString() === req.userId;
+    const isVenue = req.userRole === 'venue';
+
+    if (!isOwner && !isVenue) {
+      return res.status(403).json({ error: 'Not authorized to delete this item' });
+    }
+
+    await Item.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Item deleted' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
