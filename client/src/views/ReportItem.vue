@@ -1,5 +1,5 @@
 <template>
-  <div class="report-item">
+  <div class="report-item view-container">
     <h1>Report a Lost Item</h1>
     <form @submit.prevent="submitReport">
       <label>

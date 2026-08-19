@@ -1,5 +1,5 @@
 <template>
-  <div class="venue-dashboard">
+  <div class="venue-dashboard view-container">
     <h1>Venue Dashboard</h1>
 
     <p v-if="!isVenue">This page is only available to venue accounts.</p>

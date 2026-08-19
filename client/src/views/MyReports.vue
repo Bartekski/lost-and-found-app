@@ -1,5 +1,5 @@
 <template>
-  <div class="my-reports">
+  <div class="my-reports view-container">
     <h1>My Reports</h1>
 
     <p v-if="loading">Loading...</p>

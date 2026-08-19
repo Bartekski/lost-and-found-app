@@ -1,5 +1,5 @@
 <template>
-  <div class="item-chat">
+  <div class="item-chat view-container">
     <h1>Chat about: {{ itemName }}</h1>
 
     <div class="messages">
