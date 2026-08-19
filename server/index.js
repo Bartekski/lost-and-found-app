@@ -12,6 +12,8 @@ const requireAuth = require('./middleware/auth');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const N8N_WEBHOOK_URL = 'https://looooooost.app.n8n.cloud/webhook/99c328c7-2342-4d19-a777-68fdd3305fa4';
+
 app.use(cors());
 app.use(express.json());
 
@@ -89,7 +91,6 @@ app.post('/api/auth/login', async (req, res) => {
 
 // ---------- VENUE ROUTES ----------
 
-// List all venue accounts (used by guests to pick a venue when reporting)
 app.get('/api/venues', async (req, res) => {
   try {
     const venues = await User.find({ role: 'venue' }).select('name _id');
@@ -155,7 +156,7 @@ app.get('/api/items/all', requireAuth, async (req, res) => {
   }
 });
 
-// Update an item (e.g. mark as found) - venue only
+// Update an item (e.g. mark as found) - venue only, triggers n8n notification
 app.put('/api/items/:id', requireAuth, async (req, res) => {
   try {
     if (req.userRole !== 'venue') {
@@ -175,6 +176,26 @@ app.put('/api/items/:id', requireAuth, async (req, res) => {
     }
 
     console.log('Item updated:', updatedItem);
+
+    // Trigger n8n notification when marked as found
+    if (status === 'found') {
+      const guest = await User.findById(updatedItem.userId);
+      const venue = await User.findById(updatedItem.venueId);
+
+      if (guest) {
+        fetch(N8N_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            guestEmail: guest.email,
+            guestName: guest.name,
+            itemName: updatedItem.name,
+            venueName: venue ? venue.name : 'the venue',
+          }),
+        }).catch(err => console.error('Failed to trigger n8n webhook:', err));
+      }
+    }
+
     res.json(updatedItem);
   } catch (err) {
     console.error(err);
