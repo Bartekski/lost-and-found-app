@@ -20,6 +20,7 @@
       <ul v-else>
         <li v-for="item in filteredItems" :key="item._id">
           <strong>{{ item.name }}</strong> ({{ item.category }}) - {{ item.status }}
+          <span class="reporter-info" v-if="item.userId"> — {{ item.userId.name }} ({{ item.userId.email }})</span>
           <p>{{ item.description }}</p>
           <p>Lost at: {{ item.location }} on {{ item.date }}</p>
           <router-link :to="{ path: `/chat/${item._id}`, query: { name: item.name } }">Chat</router-link>

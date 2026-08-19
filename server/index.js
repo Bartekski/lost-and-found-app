@@ -215,7 +215,10 @@ app.get('/api/items/all', requireAuth, async (req, res) => {
       return res.status(403).json({ error: 'Only venue accounts can view all items' });
     }
 
-    const items = await Item.find({ venueId: req.userId }).sort({ createdAt: -1 });
+    const items = await Item.find({ venueId: req.userId })
+      .populate('userId', 'name email')
+      .sort({ createdAt: -1 });
+
     res.json(items);
   } catch (err) {
     console.error(err);
