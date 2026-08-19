@@ -11,6 +11,7 @@
         <p>{{ item.description }}</p>
         <p>Lost at: {{ item.location }} on {{ item.date }}</p>
         <p>Status: {{ item.status }}</p>
+        <router-link :to="{ path: `/chat/${item._id}`, query: { name: item.name } }">Chat</router-link>
       </li>
     </ul>
   </div>

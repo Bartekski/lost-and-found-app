@@ -8,6 +8,7 @@ const connectDB = require('./db');
 const Item = require('./models/Item');
 const User = require('./models/User');
 const requireAuth = require('./middleware/auth');
+const Message = require('./models/Message');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,6 +25,38 @@ app.get('/api/health', (req, res) => {
 });
 
 // ---------- AUTH ROUTES ----------
+// Get messages for a specific item
+app.get('/api/items/:id/messages', requireAuth, async (req, res) => {
+  try {
+    const messages = await Message.find({ itemId: req.params.id }).sort({ createdAt: 1 });
+    res.json(messages);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Send a message on a specific item
+app.post('/api/items/:id/messages', requireAuth, async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: 'Message text is required' });
+
+    const user = await User.findById(req.userId);
+
+    const message = await Message.create({
+      itemId: req.params.id,
+      senderId: req.userId,
+      senderName: user.name,
+      text,
+    });
+
+    res.status(201).json(message);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 app.post('/api/auth/register', async (req, res) => {
   try {

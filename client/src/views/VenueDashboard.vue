@@ -13,6 +13,7 @@
           <strong>{{ item.name }}</strong> ({{ item.category }}) - {{ item.status }}
           <p>{{ item.description }}</p>
           <p>Lost at: {{ item.location }} on {{ item.date }}</p>
+          <router-link :to="{ path: `/chat/${item._id}`, query: { name: item.name } }">Chat</router-link>
           <button v-if="item.status === 'lost'" @click="markAsFound(item._id)">
             Mark as Found
           </button>
