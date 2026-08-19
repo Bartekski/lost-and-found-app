@@ -156,6 +156,24 @@ app.put('/api/auth/profile', requireAuth, async (req, res) => {
   }
 });
 
+app.delete('/api/auth/account', requireAuth, async (req, res) => {
+  try {
+    // Delete all items reported by this user (if guest) or owned by this venue
+    await Item.deleteMany({ $or: [{ userId: req.userId }, { venueId: req.userId }] });
+
+    // Delete all messages sent by this user
+    await Message.deleteMany({ senderId: req.userId });
+
+    // Delete the user account itself
+    await User.findByIdAndDelete(req.userId);
+
+    res.json({ message: 'Account deleted' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // ---------- VENUE ROUTES ----------
 
 app.get('/api/venues', async (req, res) => {

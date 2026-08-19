@@ -31,13 +31,20 @@
       <p v-if="success" class="success">Profile updated!</p>
 
       <button type="submit">Save Changes</button>
+
     </form>
+
+    <button @click="deleteAccount" class="danger" style="margin-top: 1.5rem;">
+      Delete My Account
+    </button>
   </div>
 </template>
 
 <script setup>
 import { reactive, ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const loading = ref(true)
 const error = ref('')
 const success = ref(false)
@@ -99,6 +106,27 @@ async function saveProfile() {
     form.password = ''
   } catch (err) {
     error.value = err.message
+  }
+}
+
+
+async function deleteAccount() {
+  if (!confirm('Are you sure? This will permanently delete your account and all your reports. This cannot be undone.')) return
+
+  const token = localStorage.getItem('token')
+  try {
+    const response = await fetch('http://localhost:3000/api/auth/account', {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+
+    if (!response.ok) throw new Error('Failed to delete account')
+
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    router.push('/')
+  } catch (err) {
+    console.error(err)
   }
 }
 </script>
